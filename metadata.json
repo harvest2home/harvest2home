@@ -1,0 +1,9 @@
+{
+  "name": "Harvest2Home.store",
+  "description": "A farmer-to-bulk-buyer B2B platform connecting agricultural producers directly with wholesalers, hotels, and supermarkets.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone",
+    "geolocation"
+  ]
+}
