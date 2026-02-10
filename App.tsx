@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Layout from './components/Layout';
@@ -7,6 +8,7 @@ import { FarmerDashboard, AddProductForm } from './components/FarmerView';
 import { MarketBrowser, BuyerOrders } from './components/BuyerView';
 import { AdminDashboard } from './components/AdminView';
 import Assistant from './components/Assistant';
+import { GoogleGenAI } from "@google/genai";
 
 const Navigation: React.FC = () => (
   <nav className="bg-[#1b4332] text-white px-6 md:px-12 py-2.5 hidden md:flex items-center justify-between border-b border-white/10 sticky top-0 z-50 backdrop-blur-lg">
@@ -24,10 +26,6 @@ const Navigation: React.FC = () => (
     </div>
 
     <div className="flex gap-5 lg:gap-6 flex-shrink-0 ml-4">
-      <div className="flex items-center gap-3 mr-4">
-        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-        <span className="text-[9px] font-black text-white/50 uppercase tracking-widest">Global Node Active</span>
-      </div>
       <button className="px-7 lg:px-9 py-3 rounded-full border border-white/20 text-white text-[10px] font-black uppercase tracking-wider hover:bg-white hover:text-[#1b4332] transition-all whitespace-nowrap">
         Farmer Enrollment
       </button>
@@ -67,12 +65,6 @@ const LandingPage: React.FC<{ onAction: (role: UserRole) => void }> = ({ onActio
 
   return (
     <div className="min-h-screen bg-white font-outfit relative">
-      <div className="fixed top-4 right-4 z-[60] pointer-events-none">
-        <div className="bg-green-500/10 backdrop-blur-md border border-green-500/20 px-4 py-1.5 rounded-full flex items-center gap-2">
-           <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-           <span className="text-[10px] font-black text-green-700 uppercase tracking-widest">Production Node v1.1.4</span>
-        </div>
-      </div>
       <Navigation />
       <MarketTicker />
       
@@ -96,7 +88,7 @@ const LandingPage: React.FC<{ onAction: (role: UserRole) => void }> = ({ onActio
           <div className="max-w-4xl space-y-8 animate-enter">
             <div className="inline-flex items-center gap-3 px-5 py-2 bg-white/10 backdrop-blur-2xl rounded-full border border-white/20 text-[#ff9f1c] text-[10px] font-black uppercase tracking-[0.4em]">
               <span className="w-2.5 h-2.5 rounded-full bg-[#ff9f1c] animate-pulse"></span>
-              National B2B Exchange System
+              National B2B Exchange
             </div>
 
             <h1 className="text-6xl md:text-7xl lg:text-9xl font-black tracking-tighter leading-[0.85] text-white">
@@ -189,7 +181,7 @@ const LandingPage: React.FC<{ onAction: (role: UserRole) => void }> = ({ onActio
         </div>
       </section>
 
-      {/* Institutional Footer */}
+      {/* Institutional Footer Redesigned for Full Coverage */}
       <footer className="bg-[#0d1b14] text-white/70 pt-24 pb-16 px-6 md:px-12 lg:px-24 border-t border-white/5">
         <div className="max-w-7xl mx-auto">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 lg:gap-8 mb-24">
@@ -271,7 +263,7 @@ const LandingPage: React.FC<{ onAction: (role: UserRole) => void }> = ({ onActio
           </div>
         </div>
 
-        {/* Legal Modal */}
+        {/* Full Screen Legal Modal */}
         {modalContent && (
           <div className="fixed inset-0 z-[100] bg-[#0d1b14]/95 backdrop-blur-xl flex items-center justify-center p-6 sm:p-12" onClick={() => setModalContent(null)}>
             <div className="bg-white p-12 sm:p-20 rounded-[80px] max-w-3xl w-full animate-enter text-[#1b4332] shadow-[0_60px_120px_-20px_rgba(0,0,0,0.5)] border border-white/20" onClick={e => e.stopPropagation()}>
@@ -291,9 +283,39 @@ const RegistrationFlow: React.FC<{ role: UserRole, onBack: () => void }> = ({ ro
   const [phone, setPhone] = useState('');
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [formData, setFormData] = useState({ name: '', location: '', bank: '' });
+  const [isDetecting, setIsDetecting] = useState(false);
   const { login } = useApp();
 
   const currentFee = role === UserRole.FARMER ? FARMER_FEE : BUYER_FEE;
+
+  const detectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser");
+      return;
+    }
+    setIsDetecting(true);
+    navigator.geolocation.getCurrentPosition(async (position) => {
+      const { latitude, longitude } = position.coords;
+      try {
+        const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+        const res = await ai.models.generateContent({
+          model: 'gemini-3-flash-preview',
+          contents: `What is the clean, professional City and State name for these coordinates: ${latitude}, ${longitude}? Format precisely as "City, State" only (e.g. "Amritsar, Punjab").`,
+        });
+        const locName = res.text?.trim() || `${latitude.toFixed(2)}, ${longitude.toFixed(2)}`;
+        setFormData(prev => ({ ...prev, location: locName }));
+      } catch (err) {
+        console.error(err);
+        setFormData(prev => ({ ...prev, location: "Detected Region" }));
+      } finally {
+        setIsDetecting(false);
+      }
+    }, (err) => {
+      console.error(err);
+      alert("Unable to retrieve location. Please type manually.");
+      setIsDetecting(false);
+    });
+  };
 
   return (
     <div className="min-h-screen bg-[#fcfbf9] flex flex-col items-center justify-center p-12 font-outfit relative overflow-hidden">
@@ -328,7 +350,19 @@ const RegistrationFlow: React.FC<{ role: UserRole, onBack: () => void }> = ({ ro
             <div className="text-center"><h2 className="text-6xl font-black text-[#1b4332] italic">KYC Audit</h2></div>
             <div className="space-y-6">
               <input className="w-full px-12 py-8 bg-stone-50 rounded-[40px] font-black text-2xl outline-none shadow-inner" placeholder="Full Legal Name" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} />
-              <input className="w-full px-12 py-8 bg-stone-50 rounded-[40px] font-black text-2xl outline-none shadow-inner" placeholder="Trade Location" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} />
+              
+              <div className="relative group">
+                <input className="w-full px-12 py-8 bg-stone-50 rounded-[40px] font-black text-2xl outline-none border-2 border-transparent focus:border-[#1b4332] pr-48 shadow-inner" placeholder="Trade Location" value={formData.location} onChange={e => setFormData({...formData, location: e.target.value})} />
+                <button 
+                  onClick={detectLocation}
+                  disabled={isDetecting}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-[#1b4332] text-white px-8 py-5 rounded-[32px] text-[10px] font-black uppercase tracking-widest hover:brightness-110 flex items-center gap-2 transition-all active:scale-95"
+                >
+                  {isDetecting ? <div className="w-4 h-4 border-2 border-white/20 border-t-white rounded-full animate-spin" /> : <Icons.Map className="w-4 h-4" />}
+                  {isDetecting ? 'Detecting...' : 'Auto-Detect'}
+                </button>
+              </div>
+
               <button onClick={() => setStep(4)} className="w-full py-8 bg-[#1b4332] text-white rounded-[40px] font-black text-3xl shadow-xl mt-6 italic">Secure Seat</button>
             </div>
           </div>

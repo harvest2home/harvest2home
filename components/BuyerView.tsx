@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Icons, CATEGORIES, PLATFORM_COMMISSION } from '../constants';
@@ -16,15 +17,6 @@ export const MarketBrowser: React.FC = () => {
   );
 
   const handleBuy = async (p: Product) => {
-    if (!user || !user.id) {
-      alert("Please log in to participate in the exchange.");
-      return;
-    }
-
-    // Capture stable values for async execution to avoid closure issues
-    const currentUserId = user.id;
-    const currentUserName = user.name;
-
     const qty = p.minOrderQuantity;
     const baseTotal = qty * p.pricePerKg;
     const commission = baseTotal * PLATFORM_COMMISSION;
@@ -36,8 +28,8 @@ export const MarketBrowser: React.FC = () => {
       
       const { error } = await supabase.from('orders').insert([{
         id: newOrderId,
-        buyerId: currentUserId,
-        buyerName: currentUserName,
+        buyerId: user!.id,
+        buyerName: user!.name,
         farmerId: p.farmerId,
         productId: p.id,
         productName: p.name,
@@ -54,7 +46,7 @@ export const MarketBrowser: React.FC = () => {
           .update({ availableQuantity: p.availableQuantity - qty })
           .eq('id', p.id);
           
-        await refreshData();
+        refreshData();
         alert("Escrow Activated! Logistics partner notified for pickup from " + p.location);
       } else {
         alert("Connectivity Error. Please try again.");
@@ -120,12 +112,9 @@ export const MarketBrowser: React.FC = () => {
                   className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" 
                   alt={p.name}
                 />
-                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                <div className="absolute top-4 left-4">
                   <span className="bg-[#1b4332]/80 backdrop-blur-md px-3 py-1 rounded-full text-[8px] font-black text-white uppercase tracking-widest">
                     {p.supplyFrequency}
-                  </span>
-                  <span className="bg-[#ff9f1c] px-3 py-1 rounded-full text-[7px] font-black text-white uppercase tracking-[0.2em] shadow-lg">
-                    Direct Farm Gate
                   </span>
                 </div>
                 <div className="absolute bottom-0 inset-x-0 h-20 bg-gradient-to-t from-black/60 to-transparent"></div>
@@ -147,10 +136,10 @@ export const MarketBrowser: React.FC = () => {
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-stone-50 p-3 rounded-2xl">
-                    <p className="text-[8px] text-stone-400 font-black uppercase tracking-widest mb-1">Stock</p>
+                    <p className="text-[8px] text-stone-400 font-black uppercase tracking-widest mb-1">Available</p>
                     <p className="text-xs font-black text-stone-700">{p.availableQuantity}kg</p>
                   </div>
-                  <div className="bg-stone-50 p-3 rounded-2xl border border-transparent group-hover:border-orange-100 transition-colors">
+                  <div className="bg-stone-50 p-3 rounded-2xl">
                     <p className="text-[8px] text-stone-400 font-black uppercase tracking-widest mb-1">Min Order</p>
                     <p className="text-xs font-black text-[#ff9f1c]">{p.minOrderQuantity}kg</p>
                   </div>
@@ -158,15 +147,14 @@ export const MarketBrowser: React.FC = () => {
 
                 <div className="mt-auto pt-4 border-t border-stone-50 flex items-center justify-between gap-3">
                   <div className="flex -space-x-2">
-                     <div title="Quality Verified" className="w-6 h-6 rounded-full border-2 border-white bg-green-500 flex items-center justify-center text-[8px] font-bold text-white shadow-sm"><Icons.Check className="w-3 h-3"/></div>
-                     <div title="Escrow Protected" className="w-6 h-6 rounded-full border-2 border-white bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white shadow-sm"><Icons.Shield className="w-3 h-3"/></div>
+                     <div className="w-6 h-6 rounded-full border-2 border-white bg-green-500 flex items-center justify-center text-[8px] font-bold text-white"><Icons.Check className="w-3 h-3"/></div>
+                     <div className="w-6 h-6 rounded-full border-2 border-white bg-blue-500 flex items-center justify-center text-[8px] font-bold text-white"><Icons.Shield className="w-3 h-3"/></div>
                   </div>
                   <button 
                     onClick={() => handleBuy(p)}
-                    className="flex-1 bg-[#1b4332] text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/10 hover:brightness-110 active:scale-95 transition-all flex items-center justify-center gap-2"
+                    className="flex-1 bg-[#1b4332] text-white py-3.5 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] shadow-lg shadow-green-900/10 hover:brightness-110 active:scale-95 transition-all"
                   >
                     ACQUIRE LOT
-                    <Icons.ArrowRight className="w-3 h-3" />
                   </button>
                 </div>
               </div>
@@ -176,19 +164,19 @@ export const MarketBrowser: React.FC = () => {
       </div>
 
       {/* Quick Stats Footer */}
-      <div className="bg-[#1b4332] rounded-[40px] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8 shadow-2xl shadow-green-900/40 border border-white/5">
-        <div className="space-y-4">
-           <h3 className="text-3xl font-black italic tracking-tighter leading-none">Institutional Assurance</h3>
+      <div className="bg-[#1b4332] rounded-[40px] p-10 text-white flex flex-col md:flex-row items-center justify-between gap-8">
+        <div>
+           <h3 className="text-3xl font-black italic tracking-tighter mb-2">Institutional Grade Assurance</h3>
            <p className="text-white/40 font-bold text-sm max-w-md leading-relaxed">Every transaction on Harvest2Home is backed by a secure multi-signature escrow protocol and 100% verified farm-gate sourcing.</p>
         </div>
         <div className="flex gap-10">
            <div className="text-center">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">Live Nodes</p>
-              <p className="text-4xl font-black tracking-tighter">1.2K</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">Live Traders</p>
+              <p className="text-4xl font-black tracking-tighter">1,240+</p>
            </div>
            <div className="text-center">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">Exch. Volume</p>
-              <p className="text-4xl font-black tracking-tighter text-[#ff9f1c]">₹4.2Cr</p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/30 mb-2">Exchange Volume</p>
+              <p className="text-4xl font-black tracking-tighter">₹4.2Cr</p>
            </div>
         </div>
       </div>
@@ -198,7 +186,7 @@ export const MarketBrowser: React.FC = () => {
 
 export const BuyerOrders: React.FC = () => {
   const { orders, user } = useApp();
-  const myOrders = user ? orders.filter(o => o.buyerId === user.id) : [];
+  const myOrders = orders.filter(o => o.buyerId === user?.id);
 
   return (
     <div className="space-y-6 animate-fade-in">
