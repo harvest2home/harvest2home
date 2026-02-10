@@ -17,6 +17,11 @@ export const MarketBrowser: React.FC = () => {
   );
 
   const handleBuy = async (p: Product) => {
+    if (!user) {
+      alert("Please log in to participate in the exchange.");
+      return;
+    }
+
     const qty = p.minOrderQuantity;
     const baseTotal = qty * p.pricePerKg;
     const commission = baseTotal * PLATFORM_COMMISSION;
@@ -28,8 +33,8 @@ export const MarketBrowser: React.FC = () => {
       
       const { error } = await supabase.from('orders').insert([{
         id: newOrderId,
-        buyerId: user!.id,
-        buyerName: user!.name,
+        buyerId: user.id,
+        buyerName: user.name,
         farmerId: p.farmerId,
         productId: p.id,
         productName: p.name,
@@ -186,7 +191,7 @@ export const MarketBrowser: React.FC = () => {
 
 export const BuyerOrders: React.FC = () => {
   const { orders, user } = useApp();
-  const myOrders = orders.filter(o => o.buyerId === user?.id);
+  const myOrders = user ? orders.filter(o => o.buyerId === user.id) : [];
 
   return (
     <div className="space-y-6 animate-fade-in">

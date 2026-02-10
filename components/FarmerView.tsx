@@ -8,10 +8,20 @@ import { supabase } from '../supabase';
 export const FarmerDashboard: React.FC = () => {
   const { user, products, orders, refreshData } = useApp();
   const [isPaying, setIsPaying] = useState(false);
-  const myProducts = products.filter(p => p.farmerId === user?.id);
-  const myOrders = orders.filter(o => o.farmerId === user?.id);
 
-  if (!user?.hasPaidFee) {
+  // Guard against null user to satisfy TypeScript and prevent crashes
+  if (!user) {
+    return (
+      <div className="p-20 text-center bg-white rounded-[50px] border border-stone-100 shadow-sm">
+        <p className="text-stone-400 font-black uppercase text-xs tracking-[0.3em]">Identity Verification Required</p>
+      </div>
+    );
+  }
+
+  const myProducts = products.filter(p => p.farmerId === user.id);
+  const myOrders = orders.filter(o => o.farmerId === user.id);
+
+  if (!user.hasPaidFee) {
     return (
       <div className="space-y-6 animate-fade-in">
         <div className="bg-white border-4 border-[#1b4332] p-10 rounded-[50px] text-center shadow-2xl relative overflow-hidden">
@@ -127,18 +137,19 @@ export const AddProductForm: React.FC<{ onComplete: () => void }> = ({ onComplet
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
+    if (!user) return;
     setLoading(true);
     const newProduct: Product = {
       id: Math.random().toString(36).substr(2, 9),
-      farmerId: user!.id,
-      farmerName: user!.name,
+      farmerId: user.id,
+      farmerName: user.name,
       name: selectedCrop.name,
       category: selectedCategory.id,
       pricePerKg: price,
       availableQuantity: qty,
       minOrderQuantity: 100,
       image: selectedCrop.image || `https://picsum.photos/seed/${selectedCrop.name}/800/600`,
-      location: user?.location || 'Direct Farm',
+      location: user.location || 'Direct Farm',
       supplyFrequency: frequency
     };
     
