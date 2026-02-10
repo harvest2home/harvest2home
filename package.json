@@ -1,8 +1,7 @@
-
 {
   "name": "harvest2home-store",
   "private": true,
-  "version": "1.2.8",
+  "version": "1.3.5",
   "type": "module",
   "scripts": {
     "dev": "vite",

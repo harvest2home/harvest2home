@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Icons, CROP_DATA, AGRI_FALLBACK_IMAGE } from '../constants';

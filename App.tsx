@@ -2,8 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { AppProvider, useApp } from './context/AppContext';
 import Layout from './components/Layout';
-import { UserRole, User, Product } from './types';
-import { Icons, FARMER_FEE, BUYER_FEE, MainLogo, AppIcon, FarmerIllustration, FooterLogo, COLORS, LEGAL_CONTENT, HERO_BG_URL } from './constants';
+import { UserRole } from './types';
+import { Icons, FARMER_FEE, BUYER_FEE, MainLogo, FooterLogo, LEGAL_CONTENT, HERO_BG_URL } from './constants';
 import { FarmerDashboard, AddProductForm } from './components/FarmerView';
 import { MarketBrowser, BuyerOrders } from './components/BuyerView';
 import { AdminDashboard } from './components/AdminView';
@@ -27,7 +27,7 @@ const Navigation: React.FC<{ onHome: () => void, onEnroll: () => void, onBuyer: 
     <div className="flex gap-5 lg:gap-6 flex-shrink-0 ml-4">
       <div className="flex items-center gap-3 mr-4">
         <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-        <span className="text-[9px] font-black text-white/50 uppercase tracking-widest">Exchange Node v1.2.8</span>
+        <span className="text-[9px] font-black text-white/50 uppercase tracking-widest">Exchange Node v1.3.0</span>
       </div>
       <button onClick={onEnroll} className="px-7 lg:px-9 py-3.5 rounded-full border border-white/20 text-white text-[10px] font-black uppercase tracking-wider hover:bg-white hover:text-[#1b4332] transition-all whitespace-nowrap">
         Farmer Enrollment
@@ -71,7 +71,7 @@ const LandingPage: React.FC<{ onAction: (role: UserRole) => void }> = ({ onActio
       <div className="fixed top-4 right-4 z-[60] pointer-events-none">
         <div className="bg-[#1b4332]/90 backdrop-blur-xl border border-white/10 px-5 py-2 rounded-full flex items-center gap-3 shadow-2xl">
            <span className="w-2 h-2 rounded-full bg-[#ff9f1c] animate-ping"></span>
-           <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Production Node v1.2.8</span>
+           <span className="text-[10px] font-black text-white uppercase tracking-[0.2em]">Production Node v1.3.0</span>
         </div>
       </div>
       <Navigation onHome={() => window.scrollTo(0,0)} onEnroll={() => onAction(UserRole.FARMER)} onBuyer={() => onAction(UserRole.BUYER)} />
@@ -228,7 +228,7 @@ const LandingPage: React.FC<{ onAction: (role: UserRole) => void }> = ({ onActio
               <h4 className="text-white font-black uppercase text-[11px] tracking-[0.4em]">Contact</h4>
               <div className="space-y-6">
                 <p className="text-sm font-bold text-white/80">+91 1800-123-4567</p>
-                <p className="text-sm font-bold text-white/80">node-128@harvest2home.store</p>
+                <p className="text-sm font-bold text-white/80">node-130@harvest2home.store</p>
               </div>
             </div>
           </div>
