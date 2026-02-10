@@ -1,0 +1,11 @@
+supabase 
+organization - Harvest2Home
+Project Name - Harvest2Home
+Database Password - Eeshwar0224
+
+
+
+ok here is the project URL and database key -
+sb_publishable_9pZkpcetzRwoNxzVAAQALg_W8IKG5g8
+my project ID - https://lhgadfdwfevounfhbkvx.supabase.co
+so please connect and create all databases what ever is needed for my project both front end and backend, please let me know if you need any other details, i will provide razorpay details later please use some dummy data now
