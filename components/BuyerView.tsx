@@ -17,10 +17,14 @@ export const MarketBrowser: React.FC = () => {
   );
 
   const handleBuy = async (p: Product) => {
-    if (!user) {
+    if (!user || !user.id) {
       alert("Please log in to participate in the exchange.");
       return;
     }
+
+    // Stable ID capture
+    const currentUserId = user.id;
+    const currentUserName = user.name;
 
     const qty = p.minOrderQuantity;
     const baseTotal = qty * p.pricePerKg;
@@ -33,8 +37,8 @@ export const MarketBrowser: React.FC = () => {
       
       const { error } = await supabase.from('orders').insert([{
         id: newOrderId,
-        buyerId: user.id,
-        buyerName: user.name,
+        buyerId: currentUserId,
+        buyerName: currentUserName,
         farmerId: p.farmerId,
         productId: p.id,
         productName: p.name,

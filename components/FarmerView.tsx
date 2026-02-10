@@ -17,9 +17,11 @@ export const FarmerDashboard: React.FC = () => {
     );
   }
 
-  // Use optional chaining for extra safety in filters
-  const myProducts = products.filter(p => p.farmerId === user?.id);
-  const myOrders = orders.filter(o => o.farmerId === user?.id);
+  // Capture ID in a local constant so TS knows it stays stable in async closures
+  const currentUserId = user.id;
+
+  const myProducts = products.filter(p => p.farmerId === currentUserId);
+  const myOrders = orders.filter(o => o.farmerId === currentUserId);
 
   if (!user.hasPaidFee) {
     return (
@@ -45,7 +47,7 @@ export const FarmerDashboard: React.FC = () => {
             onClick={async () => {
               setIsPaying(true);
               setTimeout(async () => {
-                const { error } = await supabase.from('users').update({ hasPaidFee: true, isApproved: true }).eq('id', user.id);
+                const { error } = await supabase.from('users').update({ hasPaidFee: true, isApproved: true }).eq('id', currentUserId);
                 if (!error) {
                   await refreshData();
                   alert("KYC & Payment Verified! Welcome to Harvest2Home Exchange.");
@@ -138,17 +140,23 @@ export const AddProductForm: React.FC<{ onComplete: () => void }> = ({ onComplet
   const handleSubmit = async () => {
     if (!user || !user.id || !selectedCrop || !selectedCategory) return;
     setLoading(true);
+    
+    // Stable variables for async call
+    const currentUserId = user.id;
+    const currentUserName = user.name;
+    const currentLocation = user.location || 'Direct Farm';
+
     const newProduct: Product = {
       id: Math.random().toString(36).substr(2, 9),
-      farmerId: user.id,
-      farmerName: user.name,
+      farmerId: currentUserId,
+      farmerName: currentUserName,
       name: selectedCrop.name,
       category: selectedCategory.id,
       pricePerKg: price,
       availableQuantity: qty,
       minOrderQuantity: 100,
       image: selectedCrop.image || `https://picsum.photos/seed/${selectedCrop.name}/800/600`,
-      location: user.location || 'Direct Farm',
+      location: currentLocation,
       supplyFrequency: frequency
     };
     
