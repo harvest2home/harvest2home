@@ -420,3 +420,4 @@ const AppContent: React.FC<{ onRegisterAction: (role: UserRole | null) => void, 
 };
 
 export default App;
+// Version 1.0.1
