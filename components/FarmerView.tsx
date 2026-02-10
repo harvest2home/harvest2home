@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useApp } from '../context/AppContext';
 import { Icons, CROP_DATA } from '../constants';
@@ -9,8 +8,8 @@ export const FarmerDashboard: React.FC = () => {
   const { user, products, orders, refreshData } = useApp();
   const [isPaying, setIsPaying] = useState(false);
 
-  // Guard against null user to satisfy TypeScript and prevent crashes
-  if (!user) {
+  // Strict guard for build safety
+  if (!user || !user.id) {
     return (
       <div className="p-20 text-center bg-white rounded-[50px] border border-stone-100 shadow-sm">
         <p className="text-stone-400 font-black uppercase text-xs tracking-[0.3em]">Identity Verification Required</p>
@@ -18,8 +17,9 @@ export const FarmerDashboard: React.FC = () => {
     );
   }
 
-  const myProducts = products.filter(p => p.farmerId === user.id);
-  const myOrders = orders.filter(o => o.farmerId === user.id);
+  // Use optional chaining for extra safety in filters
+  const myProducts = products.filter(p => p.farmerId === user?.id);
+  const myOrders = orders.filter(o => o.farmerId === user?.id);
 
   if (!user.hasPaidFee) {
     return (
@@ -44,7 +44,6 @@ export const FarmerDashboard: React.FC = () => {
             disabled={isPaying}
             onClick={async () => {
               setIsPaying(true);
-              // Realistic delay to simulate bank processing
               setTimeout(async () => {
                 const { error } = await supabase.from('users').update({ hasPaidFee: true, isApproved: true }).eq('id', user.id);
                 if (!error) {
@@ -137,7 +136,7 @@ export const AddProductForm: React.FC<{ onComplete: () => void }> = ({ onComplet
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async () => {
-    if (!user) return;
+    if (!user || !user.id || !selectedCrop || !selectedCategory) return;
     setLoading(true);
     const newProduct: Product = {
       id: Math.random().toString(36).substr(2, 9),
@@ -192,12 +191,12 @@ export const AddProductForm: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div className="flex items-center gap-6">
               <button onClick={() => setStep(1)} className="p-4 bg-white rounded-2xl border border-stone-100 text-stone-400 shadow-sm"><Icons.ChevronLeft /></button>
               <div>
-                 <h2 className="text-3xl font-black text-stone-800 italic">{selectedCategory.name} Selection</h2>
+                 <h2 className="text-3xl font-black text-stone-800 italic">{selectedCategory?.name} Selection</h2>
                  <p className="text-stone-400 font-bold text-xs uppercase tracking-widest">Select specific commodity</p>
               </div>
             </div>
             <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-              {selectedCategory.items.map((item: any) => (
+              {selectedCategory?.items.map((item: any) => (
                 <button
                   key={item.id}
                   onClick={() => { setSelectedCrop(item); setStep(3); }}
@@ -216,8 +215,8 @@ export const AddProductForm: React.FC<{ onComplete: () => void }> = ({ onComplet
             <div className="flex items-center gap-6">
               <button onClick={() => setStep(2)} className="p-4 bg-white rounded-2xl border border-stone-100 text-stone-400 shadow-sm"><Icons.ChevronLeft /></button>
               <div className="flex items-center gap-4">
-                <img src={selectedCrop.image} className="w-16 h-16 rounded-2xl object-cover border-2 border-[#1b4332]" />
-                <h2 className="text-4xl font-black text-[#1b4332] tracking-tighter italic">{selectedCrop.name}</h2>
+                <img src={selectedCrop?.image} className="w-16 h-16 rounded-2xl object-cover border-2 border-[#1b4332]" />
+                <h2 className="text-4xl font-black text-[#1b4332] tracking-tighter italic">{selectedCrop?.name}</h2>
               </div>
             </div>
 
